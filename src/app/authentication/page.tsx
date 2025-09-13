@@ -1,15 +1,3 @@
-"use client";
-
-import { Button } from "@/src/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-
 import {
   Tabs,
   TabsContent,
@@ -18,6 +6,7 @@ import {
 } from "@/src/components/ui/tabs";
 
 import SignUpForm from "./components/sign-up-form";
+import LoginForm from "./components/login-form copy";
 
 const AuthenticationPage = () => {
   return (
@@ -28,16 +17,7 @@ const AuthenticationPage = () => {
           <TabsTrigger value="register">Criar conta</TabsTrigger>
         </TabsList>
         <TabsContent value="login">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account</CardTitle>
-              <CardDescription>Faça login para continuar.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-6"></CardContent>
-            <CardFooter>
-              <Button>Entrar</Button>
-            </CardFooter>
-          </Card>
+          <LoginForm />
         </TabsContent>
         <TabsContent value="register">
           <SignUpForm />
