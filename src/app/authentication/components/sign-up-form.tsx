@@ -24,6 +24,7 @@ import { Button } from "@/src/components/ui/button";
 import { authClient } from "@/src/lib/auth-client";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const registerSchema = z.object({
   name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
@@ -57,8 +58,7 @@ const SignUpForm = () => {
           router.push("/dashboard");
         },
         onError: (error) => {
-          //TODO: Adicionar Toast
-          console.error(error);
+          toast.error("Algo deu errado ao criar a conta.");
         },
       },
     );
