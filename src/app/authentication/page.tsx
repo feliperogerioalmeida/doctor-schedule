@@ -6,7 +6,7 @@ import {
 } from "@/src/components/ui/tabs";
 
 import SignUpForm from "./components/sign-up-form";
-import LoginForm from "./components/login-form copy";
+import LoginForm from "./components/login-form";
 import { headers } from "next/headers";
 import { auth } from "@/src/lib/auth";
 import { redirect } from "next/navigation";
