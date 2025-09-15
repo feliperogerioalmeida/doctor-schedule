@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { actionClient } from "@/src/lib/next-safe-action";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { revalidatePath } from "next/cache";
 
 dayjs.extend(utc);
 
@@ -60,4 +61,5 @@ export const upsertDoctor = actionClient
           availableToTime: availbleToTimeUTC.format("HH:mm:ss"),
         },
       });
+    revalidatePath("/doctors");
   });
