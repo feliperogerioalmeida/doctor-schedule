@@ -3,6 +3,9 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db";
 
 import * as schema from "@/src/db/schema";
+import { customSession } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
+import { usersToClinicsTable } from "@/src/db/schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -15,6 +18,28 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
+  plugins: [
+    customSession(async ({ user, session }) => {
+      const clinics = await db.query.usersToClinicsTable.findMany({
+        where: eq(usersToClinicsTable.userId, user.id),
+        with: {
+          clinic: true,
+        },
+      });
+      //TODO: Ao adicionar mais de uma clinica, vamos precisar de uma forma de selecionar a clinica correta
+      const clinic = clinics[0];
+      return {
+        user: {
+          ...user,
+          clinic: {
+            id: clinic.clinicId,
+            name: clinic.clinic.name,
+          },
+        },
+        session,
+      };
+    }),
+  ],
   user: {
     modelName: "usersTable",
   },
