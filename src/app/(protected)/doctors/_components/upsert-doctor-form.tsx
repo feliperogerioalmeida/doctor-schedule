@@ -34,7 +34,7 @@ import { NumericFormat } from "react-number-format";
 import { useAction } from "next-safe-action/hooks";
 import { upsertDoctor } from "@/src/actions/upseart-doctor";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrashIcon } from "lucide-react";
 import { doctorsTable } from "@/src/db/schema";
 
 const formSchema = z

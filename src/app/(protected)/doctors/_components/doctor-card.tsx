@@ -15,11 +15,30 @@ import {
 import { Dialog, DialogTrigger } from "@/src/components/ui/dialog";
 import { Separator } from "@/src/components/ui/separator";
 import { doctorsTable } from "@/src/db/schema";
-import { CalendarIcon, ClockIcon, DollarSignIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ClockIcon,
+  DollarSignIcon,
+  TrashIcon,
+} from "lucide-react";
 import UpsertDoctorForm from "./upsert-doctor-form";
 import { getAvailability } from "../_helpers/availability";
 import { formatCurrencyInCents } from "@/src/helpers/currency";
 import { useState } from "react";
+import {
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/src/components/ui/alert-dialog";
+import { useAction } from "next-safe-action/hooks";
+import { deleteDoctor } from "@/src/actions/delete-doctor";
+import { toast } from "sonner";
 
 interface DoctorCardProps {
   doctor: typeof doctorsTable.$inferSelect;
@@ -34,6 +53,24 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
     .join("");
 
   const availability = getAvailability(doctor);
+
+  const deleteDoctorAction = useAction(deleteDoctor, {
+    onSuccess: () => {
+      toast.success("Médico deletado com sucesso");
+    },
+    onError: () => {
+      toast.error("Erro ao deletar médico");
+    },
+  });
+
+  const handleDeleteDoctorClick = async () => {
+    if (!doctor?.id) {
+      return;
+    }
+    await deleteDoctorAction.execute({
+      id: doctor?.id,
+    });
+  };
 
   return (
     <Card>
@@ -68,7 +105,7 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
 
       <Separator />
 
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2">
         <Dialog open={isUpsertDialogOpen} onOpenChange={setIsUpsertDialogOpen}>
           <DialogTrigger asChild>
             <Button className="w-full">Ver detalhes</Button>
@@ -82,6 +119,30 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
             onSuccess={() => setIsUpsertDialogOpen(false)}
           />
         </Dialog>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" className="w-full">
+              <TrashIcon /> Deletar médico
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Tem certeza que deseja deletar esse médico?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Essa ação não pode ser revertida. Isso irá deletar o médico e
+                todas as consultas agendadas.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteDoctorClick}>
+                Deletar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardFooter>
     </Card>
   );
