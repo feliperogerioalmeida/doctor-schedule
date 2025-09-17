@@ -3,7 +3,7 @@
 import { patientsTable } from "@/src/db/schema";
 import { ColumnDef } from "@tanstack/react-table";
 
-import PatientTableActions from "./table-actions";
+import PatientsTableActions from "./table-actions";
 
 type Patient = typeof patientsTable.$inferSelect;
 
@@ -47,7 +47,7 @@ export const patientTableColumns: ColumnDef<Patient>[] = [
     header: "Ações",
     cell: ({ row }) => {
       const patient = row.original;
-      return <PatientTableActions patient={patient} />;
+      return <PatientsTableActions patient={patient} />;
     },
   },
 ];
