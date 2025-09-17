@@ -154,7 +154,6 @@ export const patientsTable = pgTable("patients", {
   clinicId: uuid("clinic_id")
     .notNull()
     .references(() => clinicsTable.id, { onDelete: "cascade" }),
-
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   phoneNumber: text("phone_number").notNull().unique(),

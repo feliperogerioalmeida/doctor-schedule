@@ -36,6 +36,7 @@ import { upsertDoctor } from "@/src/actions/upseart-doctor";
 import { toast } from "sonner";
 import { Loader2, TrashIcon } from "lucide-react";
 import { doctorsTable } from "@/src/db/schema";
+import { useEffect } from "react";
 
 const formSchema = z
   .object({
@@ -75,11 +76,16 @@ const formSchema = z
   );
 
 interface UpsertDoctorFormProps {
+  isOpen: boolean;
   doctor?: typeof doctorsTable.$inferSelect;
   onSuccess?: () => void;
 }
 
-const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
+const UpsertDoctorForm = ({
+  doctor,
+  onSuccess,
+  isOpen,
+}: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
@@ -96,6 +102,23 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
       avatarImageUrl: doctor?.avatarImageUrl ?? "",
     },
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        name: doctor?.name ?? "",
+        specialty: doctor?.specialty ?? "",
+        appointmentPriceInCents: doctor?.appointmentPriceInCents
+          ? doctor.appointmentPriceInCents / 100
+          : 0,
+        availableFromWeekDay: doctor?.availableFromWeekDay.toString() ?? "1",
+        availableToWeekDay: doctor?.availableToWeekDay.toString() ?? "5",
+        availableFromTime: doctor?.availableFromTime ?? "",
+        availableToTime: doctor?.availableToTime ?? "",
+        avatarImageUrl: doctor?.avatarImageUrl ?? "",
+      });
+    }
+  }, [isOpen, doctor, form]);
 
   const upsertDoctorAction = useAction(upsertDoctor, {
     onSuccess: () => {
