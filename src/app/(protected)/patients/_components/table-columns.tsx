@@ -1,17 +1,9 @@
 "use client";
 
-import { Button } from "@/src/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu";
 import { patientsTable } from "@/src/db/schema";
 import { ColumnDef } from "@tanstack/react-table";
-import { EditIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
+
+import PatientTableActions from "./table-actions";
 
 type Patient = typeof patientsTable.$inferSelect;
 
@@ -55,27 +47,7 @@ export const patientTableColumns: ColumnDef<Patient>[] = [
     header: "Ações",
     cell: ({ row }) => {
       const patient = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" size="icon">
-              <MoreVerticalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>{patient.name}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <EditIcon />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <TrashIcon />
-              Excluir
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <PatientTableActions patient={patient} />;
     },
   },
 ];
