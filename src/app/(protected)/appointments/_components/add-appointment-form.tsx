@@ -1,8 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import dayjs from "dayjs";
 import { CalendarIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
@@ -12,6 +14,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { addAppointment } from "@/src/actions/add-appointment";
+import { getAvailableTimes } from "@/src/actions/get-available-times";
 import { Button } from "@/src/components/ui/button";
 import { Calendar } from "@/src/components/ui/calendar";
 import {
@@ -67,7 +70,6 @@ interface AddAppointmentFormProps {
   isOpen: boolean;
   patients: (typeof patientsTable.$inferSelect)[];
   doctors: (typeof doctorsTable.$inferSelect)[];
-
   onSuccess?: () => void;
 }
 
@@ -89,14 +91,24 @@ const AddAppointmentForm = ({
     },
   });
 
-  const watchedDoctorId = form.watch("doctorId");
-  const watchedPatientId = form.watch("patientId");
+  const selectedDoctorId = form.watch("doctorId");
+  const selectedPatientId = form.watch("patientId");
+  const selectedDate = form.watch("date");
+
+  const { data: availableTimes } = useQuery({
+    queryKey: ["available-times", selectedDate, selectedDoctorId],
+    queryFn: () =>
+      getAvailableTimes({
+        date: dayjs(selectedDate).format("YYYY-MM-DD"),
+        doctorId: selectedDoctorId,
+      }),
+  });
 
   // Atualizar o preço quando o médico for selecionado
   useEffect(() => {
-    if (watchedDoctorId) {
+    if (selectedDoctorId) {
       const selectedDoctor = doctors.find(
-        (doctor) => doctor.id === watchedDoctorId,
+        (doctor) => doctor.id === selectedDoctorId,
       );
       if (selectedDoctor) {
         form.setValue(
@@ -105,7 +117,7 @@ const AddAppointmentForm = ({
         );
       }
     }
-  }, [watchedDoctorId, doctors, form]);
+  }, [selectedDoctorId, doctors, form]);
 
   useEffect(() => {
     if (isOpen) {
@@ -132,18 +144,16 @@ const AddAppointmentForm = ({
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     createAppointmentAction.execute({
       ...values,
-
       appointmentPriceInCents: values.appointmentPrice * 100,
     });
   };
 
-  const isDateTimeEnabled = watchedPatientId && watchedDoctorId;
+  const isDateTimeEnabled = selectedPatientId && selectedDoctorId;
 
   return (
     <DialogContent className="sm:max-w-[500px]">
       <DialogHeader>
         <DialogTitle>Novo agendamento</DialogTitle>
-
         <DialogDescription>
           Crie um novo agendamento para sua clínica.
         </DialogDescription>
@@ -223,7 +233,7 @@ const AddAppointmentForm = ({
                   thousandSeparator="."
                   prefix="R$ "
                   allowNegative={false}
-                  disabled={!watchedDoctorId}
+                  disabled={!selectedDoctorId}
                   customInput={Input}
                 />
                 <FormMessage />
@@ -283,7 +293,7 @@ const AddAppointmentForm = ({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={!isDateTimeEnabled}
+                  disabled={!isDateTimeEnabled || !selectedDate}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -291,15 +301,11 @@ const AddAppointmentForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {/* TODO: Implementar horários disponíveis baseados no médico */}
-                    <SelectItem value="08:00">08:00</SelectItem>
-                    <SelectItem value="09:00">09:00</SelectItem>
-                    <SelectItem value="10:00">10:00</SelectItem>
-                    <SelectItem value="11:00">11:00</SelectItem>
-                    <SelectItem value="14:00">14:00</SelectItem>
-                    <SelectItem value="15:00">15:00</SelectItem>
-                    <SelectItem value="16:00">16:00</SelectItem>
-                    <SelectItem value="17:00">17:00</SelectItem>
+                    {availableTimes?.data?.map((time) => (
+                      <SelectItem key={time.value} value={time.value}>
+                        {time.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />

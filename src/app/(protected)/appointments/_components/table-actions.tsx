@@ -2,7 +2,6 @@
 
 import { MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
 
 import { deleteAppointment } from "@/src/actions/delete-appointment";
 import {
@@ -26,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
 import { appointmentsTable } from "@/src/db/schema";
+import { toast } from "sonner";
 
 type AppointmentWithRelations = typeof appointmentsTable.$inferSelect & {
   patient: {
