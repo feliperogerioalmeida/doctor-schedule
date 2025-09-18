@@ -12,10 +12,16 @@ import {
   PageTitle,
 } from "@/src/components/page-container";
 import { db } from "@/src/db";
-import { doctorsTable, patientsTable } from "@/src/db/schema";
+import {
+  appointmentsTable,
+  doctorsTable,
+  patientsTable,
+} from "@/src/db/schema";
 import { auth } from "@/src/lib/auth";
 
 import AddAppointmentButton from "./_components/add-appointment-button";
+import { appointmentsTableColumns } from "./_components/table-columns";
+import { DataTable } from "@/src/components/data-table";
 
 const AppointmentsPage = async () => {
   const session = await auth.api.getSession({
@@ -28,12 +34,19 @@ const AppointmentsPage = async () => {
     redirect("/clinic-form");
   }
 
-  const [patients, doctors] = await Promise.all([
+  const [patients, doctors, appointments] = await Promise.all([
     db.query.patientsTable.findMany({
       where: eq(patientsTable.clinicId, session.user.clinic.id),
     }),
     db.query.doctorsTable.findMany({
       where: eq(doctorsTable.clinicId, session.user.clinic.id),
+    }),
+    db.query.appointmentsTable.findMany({
+      where: eq(appointmentsTable.clinicId, session.user.clinic.id),
+      with: {
+        patient: true,
+        doctor: true,
+      },
     }),
   ]);
 
@@ -51,10 +64,7 @@ const AppointmentsPage = async () => {
         </PageActions>
       </PageHeader>
       <PageContent>
-        {/* TODO: Implementar listagem de agendamentos */}
-        <div className="text-muted-foreground py-8 text-center">
-          Listagem de agendamentos será implementada em breve
-        </div>
+        <DataTable data={appointments} columns={appointmentsTableColumns} />
       </PageContent>
     </PageContainer>
   );

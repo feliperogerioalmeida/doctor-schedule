@@ -1,17 +1,17 @@
 "use server";
 
-import dayjs from "dayjs";
-import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
-
-import { db } from "@/src/db";
 import { appointmentsTable } from "@/src/db/schema";
 import { auth } from "@/src/lib/auth";
 import { actionClient } from "@/src/lib/next-safe-action";
-import { upsertAppointmentSchema } from "./schema";
 
-export const upsertAppointment = actionClient
-  .inputSchema(upsertAppointmentSchema)
+import { addAppointmentSchema } from "./schema";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import dayjs from "dayjs";
+import { db } from "@/src/db";
+
+export const addAppointment = actionClient
+  .inputSchema(addAppointmentSchema)
   .action(async ({ parsedInput }) => {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -28,20 +28,11 @@ export const upsertAppointment = actionClient
       .set("minute", parseInt(parsedInput.time.split(":")[1]))
       .toDate();
 
-    await db
-      .insert(appointmentsTable)
-      .values({
-        ...parsedInput,
-        id: parsedInput.id,
-        clinicId: session?.user.clinic?.id,
-        date: appointmentDateTime,
-      })
-      .onConflictDoUpdate({
-        target: [appointmentsTable.id],
-        set: {
-          ...parsedInput,
-          date: appointmentDateTime,
-        },
-      });
+    await db.insert(appointmentsTable).values({
+      ...parsedInput,
+      clinicId: session?.user.clinic?.id,
+      date: appointmentDateTime,
+    });
+
     revalidatePath("/appointments");
   });

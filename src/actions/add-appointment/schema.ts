@@ -1,8 +1,7 @@
 import { z } from "zod";
 
-export const upsertAppointmentSchema = z.object({
-  id: z.uuid().optional(),
-  patientId: z.string().uuid({
+export const addAppointmentSchema = z.object({
+  patientId: z.uuid({
     message: "Paciente é obrigatório.",
   }),
   doctorId: z.string().uuid({
